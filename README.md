@@ -5,7 +5,7 @@ Configuring and Securing Containers and Kubernetes
 
 ## Introduction
 This depicts the deployment of a proof of concept using Azure Container Registry and Azure Kubernetes Service.  
-This POC will demonstrate the following:  
+This POC demonstrates the following:  
 - Building an image using Dockerfile  
 - Storing images using Azure Container Regsitry  
 - Kubernetes configuration of using AKS  
@@ -13,12 +13,10 @@ This POC will demonstrate the following:
 
 ---
 
-## Services deployed
-- There are the 2 primary services required for this project
+## Services deployed  
+There are the 2 primary services required for this project
 
-![](kubernetesService.jpeg)   
-![](containerRegistry.png)  
-
+![](/icons/kubernetesServices.jpeg)    ![](/icons/containerRegistry.png)  
 
 ---
 
@@ -37,39 +35,37 @@ This POC will demonstrate the following:
 ***
 
 ## 1. Create an Azure Container Registry.    
-## 1a ABC ##
-* ### 1a DEF 
+* Create a res group <br>
+az group create --name rg-a5-ACRAKS --location uksouth  <br>
 
-#create a res group
-*<ins>az group create --name rg-a5-ACRAKS --location uksouth<ins>*
-
-#create a new Azure Container Registry (ACR) instance
-*<ins>az acr create --resource-group rg-a5-ACRAKS --name w2cA5ACR --sku Basic<ins>*  
+* Create a new Azure Container Registry (ACR) instance <br>
+az acr create --resource-group rg-a5-ACRAKS --name w2cA5ACR --sku Basic  
 
 The above syntax initiates the deployment of a new instance of a container Resgistry.  
  
+![](/img/Screenshotfrom2024-01-0823-36-11.png)  
+<br>
+![](/img/Screenshotfrom2024-01-0823-43-25.png)
 
 *** 
 ***
 
 ## 2. Create a Dockerfile, build a container and push it to Azure Container Registry.    
-## 2a create a Dockerfile, build an image from the Dockerfile, and deploy the image to the ACR. ##
-* ### create a Dockerfile  
--Create a Dockerfile to create an Nginx-based image
+Create a Dockerfile, build an image from the Dockerfile, and deploy the image to the ACR.  
+- Create a Dockerfile (to create an Nginx-based image)  
+echo FROM nginx > Dockerfile <br>
+- Build an image from the Dockerfile
+-build an image from the Dockerfile and push the image to the new ACR.  <br>
+ ACRNAME=$(az acr list --resource-group rg-a5-ACRAKS --query '[].{Name:name}' --output tsv)  <br>
 
-*<ins>echo FROM nginx > Dockerfile<ins>*
-
-
-* ### build an image from the Dockerfile
--build an image from the Dockerfile and push the image to the new ACR.
- ACRNAME=$(az acr list --resource-group rg-a5-ACRAKS --query '[].{Name:name}' --output tsv)
-
--push the image to the new ACR
+- Push the image to the new ACR  <br>
  az acr build --resource-group rg-a5-ACRAKS --image sample/nginx:v1 --registry $ACRNAME --file Dockerfile .
 
-photos
-photos
-photos
+![](/img/Screenshotfrom2024-01-0823-55-19.png)  
+<br>
+![](/img/Screenshotfrom2024-01-0900-02-23.png)  
+<br>
+![](/img/Screenshotfrom2024-01-0900-02-59.png)
 
 <br>
 
@@ -77,72 +73,55 @@ photos
 ***
 
 ## 3. Create an Azure Kubernetes Service clustery.  
--in this task, you will create an Azure Kubernetes service and review the deployed resources.  
---See json template
---monitoring disabled in setup but this is recommendaed inproduction scenarios.
---an additional RG is created autmoatically to hold components of the AKS Nodes (--shown screenshot)
+- Create an Azure Kubernetes service and review the deployed resources.  
+See ![create AKS.json](https://github.com/Ladcze/configure-and-secure-ACR-AKS-workloads/blob/b595a519dd1f95fa4741a722353bcffecd0e125c/create%20AKS.json)  
+"Note that monitoring is disabled in setup but this is recommendaed inproduction scenarios".
+  
+An additional RG is created autmoatically to hold components of the AKS Nodes (as referenced in screenshot below)  <br>
+![](/img/Screenshotfrom2024-01-0900-19-31.png)
 
 
-## 1a ABC ##
-* connect to the Kubernetes cluster:
-*az aks get-credentials --resource-group rg-a5-ACRAKS --name w2cKubernetesCluster*
-The above sequence will initiate the deployment of the Azure VM and Azure SQL Database required for this proof of concept.
+<br>
 
---list nodes of the Kubenetes cluster:
-*kubectl get nodes*
+- Connect to the Kubernetes cluster: <br>
+az aks get-credentials --resource-group rg-a5-ACRAKS --name w2cKubernetesCluster
+<br>  
+List nodes of the Kubenetes cluster:  <br>
+kubectl get nodes
 
-see photo
+![](/img/Screenshotfrom2024-01-0900-31-49.png)
 
 *** 
 ***
 
 ## 4. Configure the AKS cluster permissions to access the ACR.  
-## 4a Grant the AKS cluster permission (acrpull) to access the ACR and manage its virtual network ## 
-* ### 1a DEF 
+* Grant the AKS cluster permission (acrpull) to access the ACR and manage its virtual network  
+This grants the ‘acrpull’ role assignment to the ACR.  
+![](/img/Screenshotfrom2024-01-0900-35-47.png)
 
- ACRNAME=$(az acr list --resource-group rg-a5-ACRAKS --query '[].{Name:name}' --output tsv)
-
- az aks update -n w2cKubernetesCluster -g rg-a5-ACRAKS --attach-acr $ACRNAME
-
-#This grants the ‘acrpull’ role assignment to the ACR.  
-
-
-## 4b grant the AKS cluster the Contributor role to its virtual network ##
- RG_AKS=rg-a5-ACRAKS
-
- RG_VNET=MC_rg-a5-ACRAKS_w2cKubernetesCluster_uksouth	
-
- AKS_VNET_NAME=aks-vnet-14927705
-    
- AKS_CLUSTER_NAME=w2cKubernetesCluster
-    
- AKS_VNET_ID=$(az network vnet show --name $AKS_VNET_NAME --resource-group $RG_VNET --query id -o tsv)
-    
- AKS_MANAGED_ID=$(az aks show --name $AKS_CLUSTER_NAME --resource-group $RG_AKS --query identity.principalId -o tsv)
-    
- az role assignment create --assignee $AKS_MANAGED_ID --role "Contributor" --scope $AKS_VNET_ID
-
----show photo/result
-
-<br> 
+* Grant the AKS cluster the Contributor role to its virtual network
+  See ![AKS ContibutorADRole.sh](https://github.com/Ladcze/configure-and-secure-ACR-AKS-workloads/blob/b595a519dd1f95fa4741a722353bcffecd0e125c/AKS%20ContibutorADRole.sh)
+<br>
 
 *** 
 ***
 
 ## 5. Deploy an external service to AKS.    
-## 1a ABC ##
-* ### 5a upload yaml files
+* Upload yaml files  
+See ![nginxexternal.yaml](https://github.com/Ladcze/configure-and-secure-ACR-AKS-workloads/blob/b595a519dd1f95fa4741a722353bcffecd0e125c/nginxexternal.yaml)  
+See ![nginxinternal.yaml](https://github.com/Ladcze/configure-and-secure-ACR-AKS-workloads/blob/b595a519dd1f95fa4741a722353bcffecd0e125c/nginxinternal.yaml)   
 
-* ### 5b Open and the nginxexternal.yaml file - to referecne the correct ACR instanceName.  
-*code ./nginxexternal.yaml*
+* Open and the nginxexternal.yaml file - to referecne the correct ACR instanceName.  
+code ./nginxexternal.yaml
 
-* ### 5c Apply the change to the cluster
- *kubectl apply -f nginxexternal.yaml*
+* Apply the change to the cluster
+ kubectl apply -f nginxexternal.yaml
+![](/img/Screenshotfrom2024-01-0901-05-00.png)
 
-* ### 5d review the output of the command you run in the previous task to verify that the deployment and the corresponding service have been created. 
-*kubectl apply -f nginxexternal.yaml* 
----to show state of deployments (see - Screenshot from 2024-01-09 01-01-04.png)  
-
+* Review the output of the command you run in the previous task to verify that the deployment and the corresponding service have been created.  
+kubectl apply -f nginxexternal.yaml
+![](/img/Screenshotfrom2024-01-0901-08-09.png)
+Screenshotfrom2024-01-0901-05-00
 
 *** 
 ***
