@@ -1,0 +1,31 @@
+{
+    "sku": {
+        "name": "Basic",
+        "tier": "Basic"
+    },
+    "type": "Microsoft.ContainerRegistry/registries",
+    "id": "/subscriptions/25bf17f5-6425-442e-ae4a-138940a30607/resourceGroups/rg-a5-ACRAKS/providers/Microsoft.ContainerRegistry/registries/w2ca5acr",
+    "name": "w2ca5acr",
+    "location": "uksouth",
+    "tags": {},
+    "properties": {
+        "loginServer": "w2ca5acr.azurecr.io",
+        "creationDate": "2024-01-08T23:37:21.0398488Z",
+        "provisioningState": "Succeeded",
+        "adminUserEnabled": false,
+        "policies": {
+            "quarantinePolicy": {
+                "status": "disabled"
+            },
+            "trustPolicy": {
+                "type": "Notary",
+                "status": "disabled"
+            },
+            "retentionPolicy": {
+                "days": 7,
+                "lastUpdatedTime": "2024-01-08T23:37:27.699078+00:00",
+                "status": "disabled"
+            }
+        }
+    }
+}
