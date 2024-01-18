@@ -114,50 +114,42 @@ See ![nginxinternal.yaml](https://github.com/Ladcze/configure-and-secure-ACR-AKS
 * Open and the nginxexternal.yaml file - to referecne the correct ACR instanceName.  
 code ./nginxexternal.yaml
 
-* Apply the change to the cluster
- kubectl apply -f nginxexternal.yaml
-![](/img/Screenshotfrom2024-01-0901-05-00.png)
+* Apply the change to the cluster  
+kubectl apply -f nginxexternal.yaml <br>
 
 * Review the output of the command you run in the previous task to verify that the deployment and the corresponding service have been created.  
 kubectl apply -f nginxexternal.yaml
-![](/img/Screenshotfrom2024-01-0901-08-09.png)
-Screenshotfrom2024-01-0901-05-00
+![](/img/Screenshotfrom2024-01-0900-56-13.png)
+
 
 *** 
 ***
 
 ## 6. Test access to an external AKS-hosted service.    
-## Verify the container can be accessed externally using the public IP address. ##
-* ### 6a - Retrieve information about the nginxexternal service including name, type, IP addresses, and ports.
-*kubectl get service nginxexternal*
+Verify the container can be accessed externally using the public IP address.  
+* Retrieve information about the nginxexternal service including name, type, IP addresses, and ports.
+kubectl get service nginxexternal  
 
 result: - see welcome page on browser. 
+![](/img/Screenshotfrom2024-01-0901-08-09.png)
 
 *** 
 ***
 
 ## 7. Deploy an internal service to AKS  
-## 1a ABC ##
-* ### 5b Open and the nginxexternal.yaml file - to referecne the correct ACR instanceName.  
-*code ./nginxinternal.yaml*
-
+Open and the nginxexternal.yaml file - to referecne the correct ACR instanceName.  
+code ./nginxinternal.yaml
 
 *** 
 ***
 
-
 ## 8. Testing access to access an internal AKS-hosted service.    
-## 1a ABC ##
-* ### 8a list the pods in the default namespace on the AKS cluster 
-*kubectl get pods*
+* list the pods in the default namespace on the AKS cluster  
+kubectl get pods  
+![](/img/Screenshotfrom2024-01-0901-17-50.png)
 
-NAME                             READY   STATUS    RESTARTS   AGE
-nginxexternal-7df887d65b-ph52b   1/1     Running   0          21m
-nginxinternal-64869b4c5d-m4c42   1/1     Running   0          5m6s
-
-*kubectl exec -it nginxexternal-7df887d65b-ph52b -- /bin/bash*
-
-*curl http://10.0.131.251*
+kubectl exec -it nginxexternal-7df887d65b-ph52b -- /bin/bash  
+curl http://10.0.131.251  
 
 *** 
 ***
@@ -165,7 +157,7 @@ nginxinternal-64869b4c5d-m4c42   1/1     Running   0          5m6s
 ---
 
 ## Summary   
-You have configured and secured ACR and AKS.
+This sums up the configuration (and security) of both ACR and AKS instances.
 
 ---
 
